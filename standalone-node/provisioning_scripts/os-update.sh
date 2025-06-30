@@ -142,6 +142,13 @@ else
     echo "Extracted SHA256 checksum: $SHA_ID"
 fi
 
+# Take backup of these files before the upgrade 
+cp /etc/passwd /etc/cloud/passwd_backup
+cp /etc/shadow /etc/cloud/shadow_backup
+cp /etc/sudoers /etc/cloud/sudoers_backup
+cp -r /etc/sudoers.d /etc/sudoers.d.bak
+cp /etc/group /etc/cloud/group_backup
+
 # Invoke the os-update-tool.sh script
 echo "Initiating OS update..."
 /usr/bin/os-update-tool.sh -w -u "$IMAGE_PATH" -s "$SHA_ID"
@@ -160,6 +167,13 @@ INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
 if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
     cat << 'EOF' > "$COMMIT_UPDATE_SCRIPT"
 #!/bin/bash
+
+# Restore users list
+cp /etc/cloud/passwd_backup /etc/passwd
+cp /etc/cloud/shadow_backup /etc/shadow
+cp /etc/sudoers /etc/cloud/sudoers_backup /etc/sudoers
+cp -r /etc/sudoers.d.bak /etc/sudoers.d
+cp /etc/cloud/group_backup /etc/group
 
 bootctl_output=$(bootctl list)
 # Check if linux-2.efi is selected
